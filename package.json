@@ -4,7 +4,7 @@
   "description": "Express module for the Bento Box application framework",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha test/unit --recursive",
+    "test": "./node_modules/mocha/bin/mocha test/unit --recursive"
   },
   "repository": {
     "type": "git",
