@@ -44,12 +44,13 @@ module.exports = function BentoBoxExpres(bento) {
 		/**
 		 * Determine whether or not parameter is valid middleware
 		 *
-		 * @param {Function} fn
+		 * @param {*} param
 		 * @returns {Boolean}
 		 * @private
 		 */
-		_isValidMiddleware: function(fn) {
-			return typeof fn == 'function'
+		_isValidMiddleware: function(param) {
+			return typeof param == 'function' ||
+				(param.hasOwnProperty('path') && param.hasOwnProperty('callback') && typeof param.callback == 'function')
 		},
 		
 		/**
@@ -85,10 +86,14 @@ module.exports = function BentoBoxExpres(bento) {
 		/**
 		 * Add middleware to express
 		 *
-		 * @param {Function} fn
+		 * @param {Function|Object} val
 		 */
-		addMiddleware: function(fn) {
-			this.expressApp.use(fn)
+		addMiddleware: function(val) {
+			if (typeof val == 'function') {
+				this.expressApp.use(val)
+			} else {
+				this.expressApp.use(val.path, val.callback)
+			}
 		}	
 
 	}

@@ -63,6 +63,28 @@ describe('BentoBoxExpress', function() {
 			expect(bentoExpress._loadSettings).to.have.been.called.once
 		})
 
+		it('should call the the `addMiddleware` method in response to the middleware collections', function() {
+			chai.spy.on(bentoExpress, 'addMiddleware')
+			bento.add('middleware', function() {})
+			
+			setTimeout(function() {
+				expect(bentoExpress.addMiddleware).to.have.been.called.once
+			}, 20)
+		})
+
+		it('should call not call the `addMiddleware` method if the item does not contain neccessary properties', function() {
+			chai.spy.on(bentoExpress, 'addMiddleware')
+			bento.add('middleware', [])
+
+			setTimeout(function() {
+				expect(bentoExpress.addMiddleware).to.have.not.been.called.once
+			}, 20)
+		})
+
+		it('should call `_loadSettings()`', function() {
+			expect(bentoExpress._loadSettings).to.have.been.called.once
+		})
+
 	})
 
 
@@ -81,6 +103,34 @@ describe('BentoBoxExpress', function() {
 			expect(bentoExpress.expressApp.set).to.have.been.called.twice
 			expect(bentoExpress.expressApp.get('title')).to.eql('test app')
 			expect(bentoExpress.expressApp.get('views')).to.eql('templates')
+		})
+
+	})
+
+	describe('_isValidMiddleware()', function() {
+
+		var bentoExpress
+
+		beforeEach(function() {
+			bentoExpress = new BentoBoxExpress(bento)
+		})
+
+		it('should return true if item is a function', function() {
+			expect(bentoExpress._isValidMiddleware(function() {})).to.be.true
+		})
+
+		it('should return true if item is an object with path and callback properties', function() {
+			expect(bentoExpress._isValidMiddleware({
+				path: '/',
+				callback: function() {}
+			})).to.be.true
+		})
+
+		it('should return false if item is not a function and item is not an object with path and callback properties', function() {
+			expect(bentoExpress._isValidMiddleware([])).to.be.false
+			expect(bentoExpress._isValidMiddleware({
+				foo: 'bar'
+			})).to.be.false
 		})
 
 	})
