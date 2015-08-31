@@ -1,6 +1,6 @@
 var chai = require('chai')
 var spies = require('chai-spies')
-var BentoBox = require('bento-box')
+var BentoBoxFactory = require('bento-box')
 var BentoBoxExpress = require('../../index')
 var expect = chai.expect
 
@@ -10,8 +10,8 @@ describe('BentoBoxExpress', function() {
 	
 	var bento
 
-	beforeEach(function() {
-		bento = new BentoBox({
+	before(function(done) {
+		BentoBoxFactory.getInstance({
 			express: {
 				port: 8080,
 
@@ -20,6 +20,9 @@ describe('BentoBoxExpress', function() {
 					views: 'templates'
 				}
 			}
+		}, function(_bento) {
+			bento = _bento
+			done()
 		})
 	})
 
@@ -28,9 +31,8 @@ describe('BentoBoxExpress', function() {
 		var bentoExpress
 
 		beforeEach(function() {
-			bentoExpress = new BentoBoxExpress(bento)
-			chai.spy.on(bentoExpress, '_loadSettings')
-			bentoExpress.init()
+			bentoExpress = bento.use(BentoBoxExpress)
+			chai.spy.on(BentoBoxExpress, '_loadSettings')
 		})
 
 		afterEach(function(done) {
@@ -59,10 +61,6 @@ describe('BentoBoxExpress', function() {
 			}, 20)
 		})
 
-		it('should call `_loadSettings()`', function() {
-			expect(bentoExpress._loadSettings).to.have.been.called.once
-		})
-
 		it('should call the the `addMiddleware` method in response to the middleware collections', function() {
 			chai.spy.on(bentoExpress, 'addMiddleware')
 			bento.add('middleware', function() {})
@@ -81,10 +79,6 @@ describe('BentoBoxExpress', function() {
 			}, 20)
 		})
 
-		it('should call `_loadSettings()`', function() {
-			expect(bentoExpress._loadSettings).to.have.been.called.once
-		})
-
 	})
 
 
@@ -93,14 +87,10 @@ describe('BentoBoxExpress', function() {
 		var bentoExpress
 
 		beforeEach(function() {
-			bentoExpress = new BentoBoxExpress(bento)
+			bentoExpress = bento.use(BentoBoxExpress)
 		})
 
 		it('should set the express settings from the config', function() {
-			chai.spy.on(bentoExpress.expressApp, 'set')
-			bentoExpress._loadSettings()
-
-			expect(bentoExpress.expressApp.set).to.have.been.called.twice
 			expect(bentoExpress.expressApp.get('title')).to.eql('test app')
 			expect(bentoExpress.expressApp.get('views')).to.eql('templates')
 		})
@@ -109,26 +99,20 @@ describe('BentoBoxExpress', function() {
 
 	describe('_isValidMiddleware()', function() {
 
-		var bentoExpress
-
-		beforeEach(function() {
-			bentoExpress = new BentoBoxExpress(bento)
-		})
-
 		it('should return true if item is a function', function() {
-			expect(bentoExpress._isValidMiddleware(function() {})).to.be.true
+			expect(BentoBoxExpress._isValidMiddleware(function() {})).to.be.true
 		})
 
 		it('should return true if item is an object with path and callback properties', function() {
-			expect(bentoExpress._isValidMiddleware({
+			expect(BentoBoxExpress._isValidMiddleware({
 				path: '/',
 				callback: function() {}
 			})).to.be.true
 		})
 
 		it('should return false if item is not a function and item is not an object with path and callback properties', function() {
-			expect(bentoExpress._isValidMiddleware([])).to.be.false
-			expect(bentoExpress._isValidMiddleware({
+			expect(BentoBoxExpress._isValidMiddleware([])).to.be.false
+			expect(BentoBoxExpress._isValidMiddleware({
 				foo: 'bar'
 			})).to.be.false
 		})

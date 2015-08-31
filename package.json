@@ -20,5 +20,8 @@
   },
   "dependencies": {
     "express": "^4.13.0"
+  },
+  "peerDependencies": {
+    "bento-box": "git+ssh://git@gitlab.exclamationlabs.com/bento-box/bento-box.git"
   }
 }
