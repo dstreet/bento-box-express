@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.exclamationlabs.com:bento-box/bento-box-express.git"
+    "url": "https://github.com/dstreet/bento-box-express"
   },
   "author": "David Street",
   "license": "MIT",
   "devDependencies": {
-    "bento-box": "git+ssh://git@gitlab.exclamationlabs.com/bento-box/bento-box.git",
+    "bento-box": ">=0.4.0",
     "chai": "^3.0.0",
     "chai-spies": "^0.6.0",
     "mocha": "^2.2.5"
@@ -22,6 +22,6 @@
     "express": "^4.13.0"
   },
   "peerDependencies": {
-    "bento-box": "git+ssh://git@gitlab.exclamationlabs.com/bento-box/bento-box.git"
+    "bento-box": ">=0.4.0"
   }
 }
