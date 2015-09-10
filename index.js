@@ -130,11 +130,11 @@ module.exports = BentoBoxExpress = {
 		this.config = config
 		this.port = config.port || defaults.port
 		this._loadSettings()
+		
+		// Listen to middleware additions
+		bento.on('middleware').add(this.addMiddleware.bind(this), this._isValidMiddleware)
 
 		// Listen to route additions
 		bento.on('routes').add(this.addRoute.bind(this), this._isValidRoute)
-
-		// Listen to middleware additions
-		bento.on('middleware').add(this.addMiddleware.bind(this), this._isValidMiddleware)
 	}
 }
