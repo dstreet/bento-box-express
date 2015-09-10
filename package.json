@@ -1,6 +1,6 @@
 {
   "name": "bento-box-express",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Express module for the Bento Box application framework",
   "main": "index.js",
   "scripts": {
