@@ -1,49 +1,26 @@
-/*!
+/**
  * Bento Box Express
- * `````````````````````````````````````````````
+ * `````````````````````````````````````````````````````````
+ * Express extension for the Bento Box application framework
+ *
+ * Subscribes to:
+ *
+ * 		'middleware' - add - (Object|Function)
+ * 		'routes'     - add - (Object)
+ *
+ * Publishes to:
+ *
+ * 		'express'    - log - (String, String)
  */
 
 var express = require('express')
 
+var defaults = {
+	configProp: 'express',
+	port:       3000
+}
+
 module.exports = BentoBoxExpress = {
-
-	getRequestedConfig: function() {
-		return 'express'
-	},
-
-	getAccessors: function() {
-		var self = this
-
-		return {
-			addRoute: self.addRoute,
-			addMiddleware: self.addMiddleware,
-			server: self.server,
-			expressApp: self.expressApp
-		}
-	},
-
-	init: function() {
-		this.expressApp = express()
-	},
-
-	ready: function(bento, config) {
-		this.config = config
-
-		this._loadSettings()
-
-		var port = config.port || 3000
-
-		// Start the web server
-		this.server = this.expressApp.listen(port, function() {
-			console.log('Example app listening at http://%s:%s', this.server.address().address, this.server.address().port)
-		}.bind(this))
-		
-		// Listen to route additions
-		bento.on('routes').add(this.addRoute.bind(this), this._isValidRoute)
-
-		// Listen to middleware additions
-		bento.on('middleware').add(this.addMiddleware.bind(this), this._isValidMiddleware)
-	},
 
 	/**
 	 * Load and set the Express applications settings from the config
@@ -85,6 +62,19 @@ module.exports = BentoBoxExpress = {
 	},
 
 	/**
+	 * Start the express server
+	 * 
+	 * @return {Server}
+	 */
+	start: function() {
+		var server = this.expressApp.listen(this.port, function() {
+			this.bento.log('express', 'Listening at http://' + server.address().address + ':' + server.address().port)
+		}.bind(this))
+
+		return server
+	},
+
+	/**
 	 * Add a route to express
 	 *
 	 * `route` parameter must have `method`, `path`, and `callback` parameters
@@ -93,6 +83,7 @@ module.exports = BentoBoxExpress = {
 	 */
 	addRoute: function(route) {
 		this.expressApp[route.method](route.path, route.callback)
+		this.bento.log('express', ['Adding route', route.method, route.path].join(' '), 'info')
 	},
 
 	/**
@@ -103,8 +94,47 @@ module.exports = BentoBoxExpress = {
 	addMiddleware: function(val) {
 		if (typeof val == 'function') {
 			this.expressApp.use(val)
+			this.bento.log('express', 'Adding global middleware', 'info')
 		} else {
 			this.expressApp.use(val.path, val.callback)
+			this.bento.log('express', ['Adding middlware or path', val.path].join(' '), 'info')
 		}
+	},
+
+	/*
+	 * Bento Box Extension API
+	 * ========================================================================
+	 */
+	getRequestedConfig: function() {
+		return this.configProp
+	},
+
+	getAccessors: function() {
+		var self = this
+
+		return {
+			start:         self.start.bind(self),
+			addRoute:      self.addRoute.bind(self),
+			addMiddleware: self.addMiddleware.bind(self),
+			expressApp:    self.expressApp
+		}
+	},
+
+	init: function(configProp) {
+		this.configProp = configProp || defaults.configProp
+		this.expressApp = express()
+	},
+
+	ready: function(bento, config) {
+		this.bento = bento
+		this.config = config
+		this.port = config.port || defaults.port
+		this._loadSettings()
+
+		// Listen to route additions
+		bento.on('routes').add(this.addRoute.bind(this), this._isValidRoute)
+
+		// Listen to middleware additions
+		bento.on('middleware').add(this.addMiddleware.bind(this), this._isValidMiddleware)
 	}
 }

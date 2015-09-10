@@ -29,18 +29,20 @@ describe('BentoBoxExpress', function() {
 	describe('init()', function() {
 		
 		var bentoExpress
+		var server
 
 		beforeEach(function() {
 			bentoExpress = bento.use(BentoBoxExpress)
+			server = bentoExpress.start()
 			chai.spy.on(BentoBoxExpress, '_loadSettings')
 		})
 
 		afterEach(function(done) {
-			bentoExpress.server.close(done)
+			server.close(done)
 		})
 
 		it('should start the server on the specified port', function() {
-			expect(bentoExpress.server.address().port).to.equal(8080)
+			expect(server.address().port).to.equal(8080)
 		})
 
 		it('should call the the `addRoute` method in response to the routes collections', function() {
